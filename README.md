@@ -29,3 +29,10 @@ uv lock --check
 ```
 
 Auto-fix: `uv run ruff check . --fix` and `uv run ruff format .`
+
+
+## Tests
+
+```bash
+uv run pytest tests
+```
