@@ -12,6 +12,8 @@ unused templates. Lines end in CRLF, and notes can contain quoted commas.
 import csv
 import io
 from collections.abc import Sequence
+from datetime import date
+from decimal import Decimal, InvalidOperation
 
 from fantasy_api.best_ball.models import DraftedTeam
 
@@ -67,6 +69,44 @@ def read_rows(text: str) -> list[list[str]]:
     reader = csv.reader(csv_text)
 
     return list(reader)
+
+
+def parse_cents(value: str) -> int:
+    """Parse a sheet money cell ("$3.00", "$1,000.00") into integer cents.
+
+    Raises ValueError for anything that isn't a whole number of cents.
+    """
+
+    cleaned = value.replace("$", "").replace(",", "")
+
+    try:
+        parsed = Decimal(cleaned)
+    except InvalidOperation as err:
+        raise ValueError(f"not a money value: {value!r}") from err
+
+    if not parsed.is_finite() or parsed < 0:
+        raise ValueError(f"Negative or infinite: {value!r}")
+
+    cents = parsed * 100
+
+    if cents != cents.to_integral_value():
+        raise ValueError(f"Fraction of a cent: {value!r}")
+
+    return int(cents)
+
+
+def parse_sheet_date(value: str) -> date:
+    """Parse a sheet date cell ("2/11/2026", "2/1/2026" or "2/11/26").
+
+    Raises ValueError for anything else.
+    """
+    for format in ("%m/%d/%Y", "%m/%d/%y"):
+        try:
+            return date.strptime(value, format)
+        except ValueError:
+            continue
+
+    raise ValueError(f"not a parseable date: {value}")
 
 
 def parse_teams(rows: Sequence[Sequence[str]]) -> list[DraftedTeam]:

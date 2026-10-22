@@ -1,5 +1,4 @@
 from datetime import date
-from decimal import Decimal
 from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict
@@ -12,7 +11,7 @@ class Platform(StrEnum):
 
 
 class DraftPick(BaseModel):
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, json_schema_serialization_defaults_required=True)
 
     round: int
     overall: int
@@ -22,14 +21,13 @@ class DraftPick(BaseModel):
 
 
 class DraftedTeam(BaseModel):
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, json_schema_serialization_defaults_required=True)
 
     platform: Platform
     league_id: str
     league_type: str
     league_name: str
-    # TODO(step 5): sheet sends "$3.00" and "2/11/26" / "2/11/2026"; plain types reject those.
-    entry_fee: Decimal
+    entry_fee_cents: int
     draft_speed: str
     draft_date: date
     draft_pick: int

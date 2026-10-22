@@ -1,3 +1,5 @@
+from datetime import date
+
 import pytest
 
 from fantasy_api.sources import google_sheet
@@ -30,7 +32,62 @@ def test_read_rows_raises_on_html_page() -> None:
 
 
 @pytest.mark.parametrize("response", ["", "\r\n"])
-def test_read_rows_raises_on_empty_message(response: str) -> None:
-    # An unpublished or deleted sheet serves an HTML sign-in page, not CSV.
+def test_read_rows_raises_on_empty_text(response: str) -> None:
+    # A published sheet is never empty; a blank body means something upstream went wrong.
     with pytest.raises(SheetResponseError):
         google_sheet.read_rows(response)
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        pytest.param("$3.00", 300, id="dollars"),
+        pytest.param("$25.00", 2500, id="two-digit-dollars"),
+        pytest.param("$1,000.00", 100000, id="thousands-separator"),
+        pytest.param("3.00", 300, id="no-dollar-sign"),
+        pytest.param("$3", 300, id="no-cents"),
+    ],
+)
+def test_parse_cents(raw: str, expected: int) -> None:
+    assert google_sheet.parse_cents(raw) == expected
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        pytest.param("$3.005", id="fraction-of-a-cent"),
+        pytest.param("free", id="not-a-number"),
+        pytest.param("", id="empty"),
+        pytest.param("Infinity", id="infinity"),
+        pytest.param("-3", id="negative"),
+    ],
+)
+def test_parse_cents_rejects_invalid(raw: str) -> None:
+    with pytest.raises(ValueError):
+        google_sheet.parse_cents(raw)
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        pytest.param("2/11/2026", date(2026, 2, 11), id="four-digit-year"),
+        pytest.param("2/1/2026", date(2026, 2, 1), id="single-digit-day"),
+        pytest.param("2/11/26", date(2026, 2, 11), id="two-digit-year"),
+        pytest.param("12/31/25", date(2025, 12, 31), id="two-digit-year-december"),
+    ],
+)
+def test_parse_sheet_date(raw: str, expected: date) -> None:
+    assert google_sheet.parse_sheet_date(raw) == expected
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        pytest.param("13/45/2026", id="impossible-date"),
+        pytest.param("2026-02-11", id="iso-is-not-a-sheet-format"),
+        pytest.param("", id="empty"),
+    ],
+)
+def test_parse_sheet_date_rejects_invalid(raw: str) -> None:
+    with pytest.raises(ValueError):
+        google_sheet.parse_sheet_date(raw)
