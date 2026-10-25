@@ -1,3 +1,5 @@
 * text=auto eol=lf
 *.ps1 text eol=crlf
 *.bat text eol=crlf
+# INFO: BG 20261025: Recorded fixtures are byte-exact copies of external formats; never normalize them.
+api/tests/fixtures/** -text
