@@ -1,10 +1,13 @@
 from datetime import date
+from pathlib import Path
 
 import pytest
 
 from fantasy_api.best_ball.models import DraftedTeam, DraftPick, Platform
 from fantasy_api.sources import google_sheet
 from fantasy_api.sources.google_sheet import SheetLayoutError, SheetResponseError
+
+FIXTURES = Path(__file__).parent / "fixtures"
 
 
 def test_read_rows_splits_crlf_lines_into_cells() -> None:
@@ -284,3 +287,26 @@ def test_parse_teams_raises_when_the_last_block_is_short() -> None:
 
     with pytest.raises(SheetLayoutError):
         google_sheet.parse_teams(rows)
+
+
+def test_parse_teams_reads_recorded_sheet() -> None:
+    # INFO: BG 20261025: read_bytes().decode() keeps CRLFs; read_text() would turn them into "\n".
+    text = (FIXTURES / "google_sheet_teams.csv").read_bytes().decode("utf-8")
+    assert "\r\n" in text  # INFO: BG 20261025: guards the fixture against line-ending normalization
+
+    result = google_sheet.parse_teams(google_sheet.read_rows(text))
+
+    assert [team.platform for team in result.teams] == [
+        Platform.UNDERDOG,
+        Platform.DRAFTKINGS,
+        Platform.DRAFTERS,
+        Platform.UNDERDOG,
+    ]
+    assert [len(team.picks) for team in result.teams] == [20, 20, 20, 18]
+    assert result.teams[1].entry_fee_cents == 0
+    assert result.teams[0].picks[0] == DraftPick(
+        round=1, overall=1, name="Bijan Robinson", slot="RB1", nfl_team="ATL"
+    )
+    [skipped] = result.skipped
+    assert (skipped.block, skipped.sheet_row) == (5, 85)
+    assert skipped.reason.startswith("Entry Fee:")
