@@ -23,3 +23,8 @@ def settings() -> Settings:
 def client(settings: Settings) -> Iterator[TestClient]:
     with TestClient(create_app(settings)) as client:
         yield client
+
+
+@pytest.fixture
+def anyio_backend() -> str:
+    return "asyncio"

@@ -11,7 +11,10 @@ def test_healthz_returns_ok(client: TestClient) -> None:
     assert response.json() == {"status": "ok"}
 
 
-@pytest.mark.parametrize("field", ["espn_s2", "espn_swid", "draftkings_cookie", "underdog_token"])
+@pytest.mark.parametrize(
+    "field",
+    ["espn_s2", "espn_swid", "draftkings_cookie", "underdog_token", "google_sheet_publish_id"],
+)
 def test_secrets_do_not_leak(field: str, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv(field.upper(), "secret-key")
     settings = Settings(_env_file=None)

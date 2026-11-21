@@ -19,9 +19,13 @@ from datetime import date
 from decimal import Decimal, InvalidOperation
 from itertools import batched
 
+import httpx
+
 from fantasy_api.best_ball.models import DraftedTeam, DraftPick, Platform
 
 BLOCK_SIZE = 21
+
+_PUBLISHED_URL = "https://docs.google.com/spreadsheets/d/e/{publish_id}/pub"
 
 # Header names in the sheet's first row that the parser reads by name.
 _REQUIRED_COLUMNS = (
@@ -88,6 +92,28 @@ class SkippedBlock:
 class ParsedTeams:
     teams: list[DraftedTeam]
     skipped: list[SkippedBlock]
+
+
+async def fetch_csv(client: httpx.AsyncClient, publish_id: str, gid: str) -> str:
+    """Download one tab of the published sheet as CSV text."""
+
+    url = _PUBLISHED_URL.format(publish_id=publish_id)
+    params = {"gid": gid, "single": "true", "output": "csv"}
+
+    try:
+        response = await client.get(url, params=params, follow_redirects=True)
+    except httpx.HTTPError as err:
+        raise SheetResponseError(f"could not reach the sheet: {type(err).__name__}") from err
+
+    if not response.is_success:
+        raise SheetResponseError(f"sheet returned HTTP {response.status_code}")
+
+    content_type = response.headers.get("content-type", "")
+    media_type = content_type.split(";")[0].strip()
+    if media_type != "text/csv":
+        raise SheetResponseError(f"expected text/csv, got {media_type!r}")
+
+    return response.text
 
 
 def read_rows(text: str) -> list[list[str]]:

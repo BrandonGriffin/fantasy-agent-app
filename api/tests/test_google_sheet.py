@@ -1,13 +1,121 @@
 from datetime import date
 from pathlib import Path
 
+import httpx
 import pytest
 
 from fantasy_api.best_ball.models import DraftedTeam, DraftPick, Platform
 from fantasy_api.sources import google_sheet
-from fantasy_api.sources.google_sheet import SheetLayoutError, SheetResponseError
+from fantasy_api.sources.google_sheet import SheetLayoutError, SheetResponseError, fetch_csv
 
 FIXTURES = Path(__file__).parent / "fixtures"
+PUBLISH_ID = "mytest-sheet"
+GID = "123"
+# (round, overall, name, slot, nfl_team), as the sheet's columns C-G.
+type PickRow = tuple[str, str, str, str, str]
+
+# One value per metadata label, in sheet order. Written out here rather than imported
+# from google_sheet so the tests check the parser's labels against an independent copy.
+DEFAULT_META = {
+    "Fantasy Platform": "Underdog",
+    "League ID (Required)": "00000000-0000-4000-8000-000000000001",
+    "League Type": "Early Bird",
+    "League Name": "Example Contest",
+    "Entry Fee": "$3.00",
+    "Draft Speed": "Slow",
+    "Draft Start Date": "2/11/26",
+    "Draft Pick": "6",
+    "Draft URL": "https://example.com/draft/1",
+    "Pod Size": "",
+    "Contest URL": "",
+    "Regular Season Place": "",
+    "Adv. to Quarterfinals": "",
+    "Adv. to Semifinals": "",
+    "Adv. to Finals": "",
+    "Winnings": "",
+    "Roster Nickname": "",
+    "Co-manager(s)": "",
+    "Tags": "",
+    "Notes": "",
+}
+
+DEFAULT_PICKS: list[PickRow] = [
+    ("1", "6", "Bijan Robinson", "RB1", "ATL"),
+    ("2", "19", "Drake London", "WR1", "ATL"),
+    ("3", "30", "Jaxon Smith-Njigba", "WR2", "SEA"),
+]
+
+BLANK_PICK: PickRow = ("", "", "", "", "")
+
+# The sheet's first row names every column; later blocks repeat it with two blanks.
+FULL_HEADER = ["Metadata Label", "Metadata", "Round", "Pick #", "Player Name", "Pos #", "Team"]
+REPEATED_HEADER = ["Metadata", "", "Round", "Pick #", "", "Pos #", "Team"]
+
+
+@pytest.mark.anyio
+async def test_fetch_csv_returns_body_text() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert PUBLISH_ID in request.url.path
+        assert request.url.params["gid"] == GID
+        assert request.url.params["output"] == "csv"
+        return httpx.Response(200, text="a,b\r\n1,2\r\n", headers={"content-type": "text/csv"})
+
+    async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
+        assert await fetch_csv(client, PUBLISH_ID, GID) == "a,b\r\n1,2\r\n"
+
+
+@pytest.mark.anyio
+async def test_fetch_csv_follows_google_redirect() -> None:
+    csv_host = "https://doc-0s-sheets.googleusercontent.com/pub"
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.host == "docs.google.com":
+            return httpx.Response(307, headers={"location": csv_host})
+        return httpx.Response(200, text="a,b\r\n", headers={"content-type": "text/csv"})
+
+    async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
+        assert await fetch_csv(client, PUBLISH_ID, GID) == "a,b\r\n"
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize("status", [404, 500])
+async def test_fetch_csv_rejects_error_status(status: int) -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(status, text="Not available")
+
+    async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
+        with pytest.raises(SheetResponseError, match=str(status)) as excinfo:
+            await fetch_csv(client, PUBLISH_ID, GID)
+
+    assert PUBLISH_ID not in str(excinfo.value)
+
+
+@pytest.mark.anyio
+async def test_fetch_csv_rejects_html_page() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            text="<!DOCTYPE html><html><title>Sign in</title></html>",
+            headers={"content-type": "text/html; charset=utf-8"},
+        )
+
+    async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
+        with pytest.raises(SheetResponseError, match="text/html"):
+            await fetch_csv(client, PUBLISH_ID, GID)
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize("error", [httpx.ConnectError, httpx.ReadTimeout])
+async def test_fetch_csv_wraps_transport_errors(error: type[httpx.TransportError]) -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        raise error(f"failed to reach {request.url}", request=request)
+
+    async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
+        with pytest.raises(SheetResponseError, match=error.__name__) as excinfo:
+            await fetch_csv(client, PUBLISH_ID, GID)
+
+    assert isinstance(excinfo.value.__cause__, error)
+    assert PUBLISH_ID not in str(excinfo.value)
 
 
 def test_read_rows_splits_crlf_lines_into_cells() -> None:
@@ -95,49 +203,6 @@ def test_parse_sheet_date(raw: str, expected: date) -> None:
 def test_parse_sheet_date_rejects_invalid(raw: str) -> None:
     with pytest.raises(ValueError):
         google_sheet.parse_sheet_date(raw)
-
-
-# --- parse_teams -------------------------------------------------------------
-
-# (round, overall, name, slot, nfl_team), as the sheet's columns C-G.
-type PickRow = tuple[str, str, str, str, str]
-
-# One value per metadata label, in sheet order. Written out here rather than imported
-# from google_sheet so the tests check the parser's labels against an independent copy.
-DEFAULT_META = {
-    "Fantasy Platform": "Underdog",
-    "League ID (Required)": "00000000-0000-4000-8000-000000000001",
-    "League Type": "Early Bird",
-    "League Name": "Example Contest",
-    "Entry Fee": "$3.00",
-    "Draft Speed": "Slow",
-    "Draft Start Date": "2/11/26",
-    "Draft Pick": "6",
-    "Draft URL": "https://example.com/draft/1",
-    "Pod Size": "",
-    "Contest URL": "",
-    "Regular Season Place": "",
-    "Adv. to Quarterfinals": "",
-    "Adv. to Semifinals": "",
-    "Adv. to Finals": "",
-    "Winnings": "",
-    "Roster Nickname": "",
-    "Co-manager(s)": "",
-    "Tags": "",
-    "Notes": "",
-}
-
-DEFAULT_PICKS: list[PickRow] = [
-    ("1", "6", "Bijan Robinson", "RB1", "ATL"),
-    ("2", "19", "Drake London", "WR1", "ATL"),
-    ("3", "30", "Jaxon Smith-Njigba", "WR2", "SEA"),
-]
-
-BLANK_PICK: PickRow = ("", "", "", "", "")
-
-# The sheet's first row names every column; later blocks repeat it with two blanks.
-FULL_HEADER = ["Metadata Label", "Metadata", "Round", "Pick #", "Player Name", "Pos #", "Team"]
-REPEATED_HEADER = ["Metadata", "", "Round", "Pick #", "", "Pos #", "Team"]
 
 
 def team_block(
