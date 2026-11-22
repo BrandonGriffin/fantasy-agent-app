@@ -1,0 +1,371 @@
+{
+  "Leader": {
+    "MegaDraftGroupId": 900009,
+    "MegaContestKey": "100000001",
+    "MegaEntryKey": "00000000-0000-4000-8000-000000000001",
+    "UserName": "user01",
+    "UserKey": "00000000-0000-4000-8000-000000000002",
+    "UserMegaEntryCount": 0,
+    "UserMegaEntryIndex": 0,
+    "TimeRemainingOpponent": 0,
+    "Rank": 1,
+    "FantasyPoints": 1608.28,
+    "FantasyPointsOpponent": 1454.64,
+    "RankScore": 0,
+    "RankScoreOpponent": 0,
+    "UserNameOpponent": "user05",
+    "WinningValue": 0.0,
+    "Winnings": [
+      {
+        "value": 0,
+        "description": "$0"
+      }
+    ],
+    "UpdateStatus": {
+      "lastUpdateTime": "2026-11-17T05:05:58.6312034+00:00"
+    }
+  },
+  "LastWinningMegaEntry": {
+    "MegaDraftGroupId": 900009,
+    "MegaContestKey": "100000001",
+    "MegaEntryKey": "00000000-0000-4000-8000-000000000003",
+    "UserName": "user05",
+    "UserKey": "00000000-0000-4000-8000-000000000004",
+    "UserMegaEntryCount": 0,
+    "UserMegaEntryIndex": 0,
+    "TimeRemainingOpponent": 0,
+    "Rank": 2,
+    "FantasyPoints": 1454.64,
+    "FantasyPointsOpponent": 1608.28,
+    "RankScore": 0,
+    "RankScoreOpponent": 0,
+    "UserNameOpponent": "user01",
+    "WinningValue": 0.0,
+    "Winnings": [
+      {
+        "value": 0,
+        "description": "$0"
+      }
+    ],
+    "UpdateStatus": {
+      "lastUpdateTime": "2026-11-17T05:05:58.6312029+00:00"
+    }
+  },
+  "Leaderboard": [
+    {
+      "MegaDraftGroupId": 900009,
+      "MegaContestKey": "100000001",
+      "MegaEntryKey": "00000000-0000-4000-8000-000000000001",
+      "UserName": "user01",
+      "UserKey": "00000000-0000-4000-8000-000000000002",
+      "UserMegaEntryCount": 0,
+      "UserMegaEntryIndex": 0,
+      "TimeRemainingOpponent": 0,
+      "Rank": 1,
+      "FantasyPoints": 1608.28,
+      "FantasyPointsOpponent": 1454.64,
+      "RankScore": 0,
+      "RankScoreOpponent": 0,
+      "UserNameOpponent": "user05",
+      "WinningValue": 0.0,
+      "Winnings": [
+        {
+          "value": 0,
+          "description": "$0"
+        }
+      ],
+      "UpdateStatus": {
+        "lastUpdateTime": "2026-11-17T05:05:58.6312034+00:00"
+      }
+    },
+    {
+      "MegaDraftGroupId": 900009,
+      "MegaContestKey": "100000001",
+      "MegaEntryKey": "00000000-0000-4000-8000-000000000003",
+      "UserName": "user05",
+      "UserKey": "00000000-0000-4000-8000-000000000004",
+      "UserMegaEntryCount": 0,
+      "UserMegaEntryIndex": 0,
+      "TimeRemainingOpponent": 0,
+      "Rank": 2,
+      "FantasyPoints": 1454.64,
+      "FantasyPointsOpponent": 1608.28,
+      "RankScore": 0,
+      "RankScoreOpponent": 0,
+      "UserNameOpponent": "user01",
+      "WinningValue": 0.0,
+      "Winnings": [
+        {
+          "value": 0,
+          "description": "$0"
+        }
+      ],
+      "UpdateStatus": {
+        "lastUpdateTime": "2026-11-17T05:05:58.6312029+00:00"
+      }
+    },
+    {
+      "MegaDraftGroupId": 900009,
+      "MegaContestKey": "100000001",
+      "MegaEntryKey": "00000000-0000-4000-8000-000000000005",
+      "UserName": "user06",
+      "UserKey": "00000000-0000-4000-8000-000000000006",
+      "UserMegaEntryCount": 0,
+      "UserMegaEntryIndex": 0,
+      "TimeRemainingOpponent": 0,
+      "Rank": 3,
+      "FantasyPoints": 1391.16,
+      "FantasyPointsOpponent": 1608.28,
+      "RankScore": 0,
+      "RankScoreOpponent": 0,
+      "UserNameOpponent": "user01",
+      "WinningValue": 0.0,
+      "UpdateStatus": {
+        "lastUpdateTime": "2026-11-17T05:05:58.6312020+00:00"
+      },
+      "Winnings": [
+        {
+          "value": 0,
+          "description": "$0"
+        }
+      ]
+    },
+    {
+      "MegaDraftGroupId": 900009,
+      "MegaContestKey": "100000001",
+      "MegaEntryKey": "00000000-0000-4000-8000-000000000007",
+      "UserName": "user07",
+      "UserKey": "00000000-0000-4000-8000-000000000008",
+      "UserMegaEntryCount": 0,
+      "UserMegaEntryIndex": 0,
+      "TimeRemainingOpponent": 0,
+      "Rank": 4,
+      "FantasyPoints": 1328.86,
+      "FantasyPointsOpponent": 1608.28,
+      "RankScore": 0,
+      "RankScoreOpponent": 0,
+      "UserNameOpponent": "user01",
+      "WinningValue": 0.0,
+      "UpdateStatus": {
+        "lastUpdateTime": "2026-11-17T05:05:58.6312026+00:00"
+      },
+      "Winnings": [
+        {
+          "value": 0,
+          "description": "$0"
+        }
+      ]
+    },
+    {
+      "MegaDraftGroupId": 900009,
+      "MegaContestKey": "100000001",
+      "MegaEntryKey": "00000000-0000-4000-8000-000000000009",
+      "UserName": "user08",
+      "UserKey": "00000000-0000-4000-8000-000000000010",
+      "UserMegaEntryCount": 0,
+      "UserMegaEntryIndex": 0,
+      "TimeRemainingOpponent": 0,
+      "Rank": 5,
+      "FantasyPoints": 1323.54,
+      "FantasyPointsOpponent": 1608.28,
+      "RankScore": 0,
+      "RankScoreOpponent": 0,
+      "UserNameOpponent": "user01",
+      "WinningValue": 0.0,
+      "UpdateStatus": {
+        "lastUpdateTime": "2026-11-17T05:05:58.6312035+00:00"
+      },
+      "Winnings": [
+        {
+          "value": 0,
+          "description": "$0"
+        }
+      ]
+    },
+    {
+      "MegaDraftGroupId": 900009,
+      "MegaContestKey": "100000001",
+      "MegaEntryKey": "00000000-0000-4000-8000-000000000011",
+      "UserName": "fixture-me",
+      "UserKey": "00000000-0000-4000-8000-000000000012",
+      "UserMegaEntryCount": 0,
+      "UserMegaEntryIndex": 0,
+      "TimeRemainingOpponent": 0,
+      "Rank": 6,
+      "FantasyPoints": 1313.88,
+      "FantasyPointsOpponent": 1608.28,
+      "RankScore": 0,
+      "RankScoreOpponent": 0,
+      "UserNameOpponent": "user01",
+      "WinningValue": 0.0,
+      "UpdateStatus": {
+        "lastUpdateTime": "2026-11-17T05:05:58.6312028+00:00"
+      },
+      "Winnings": [
+        {
+          "value": 0,
+          "description": "$0"
+        }
+      ]
+    },
+    {
+      "MegaDraftGroupId": 900009,
+      "MegaContestKey": "100000001",
+      "MegaEntryKey": "00000000-0000-4000-8000-000000000013",
+      "UserName": "user09",
+      "UserKey": "00000000-0000-4000-8000-000000000014",
+      "UserMegaEntryCount": 0,
+      "UserMegaEntryIndex": 0,
+      "TimeRemainingOpponent": 0,
+      "Rank": 7,
+      "FantasyPoints": 1267,
+      "FantasyPointsOpponent": 1608.28,
+      "RankScore": 0,
+      "RankScoreOpponent": 0,
+      "UserNameOpponent": "user01",
+      "WinningValue": 0.0,
+      "UpdateStatus": {
+        "lastUpdateTime": "2026-11-17T05:05:58.6312024+00:00"
+      },
+      "Winnings": [
+        {
+          "value": 0,
+          "description": "$0"
+        }
+      ]
+    },
+    {
+      "MegaDraftGroupId": 900009,
+      "MegaContestKey": "100000001",
+      "MegaEntryKey": "00000000-0000-4000-8000-000000000015",
+      "UserName": "user10",
+      "UserKey": "00000000-0000-4000-8000-000000000016",
+      "UserMegaEntryCount": 0,
+      "UserMegaEntryIndex": 0,
+      "TimeRemainingOpponent": 0,
+      "Rank": 8,
+      "FantasyPoints": 1248.28,
+      "FantasyPointsOpponent": 1608.28,
+      "RankScore": 0,
+      "RankScoreOpponent": 0,
+      "UserNameOpponent": "user01",
+      "WinningValue": 0.0,
+      "UpdateStatus": {
+        "lastUpdateTime": "2026-11-17T05:05:58.6312027+00:00"
+      },
+      "Winnings": [
+        {
+          "value": 0,
+          "description": "$0"
+        }
+      ]
+    },
+    {
+      "MegaDraftGroupId": 900009,
+      "MegaContestKey": "100000001",
+      "MegaEntryKey": "00000000-0000-4000-8000-000000000017",
+      "UserName": "user11",
+      "UserKey": "00000000-0000-4000-8000-000000000018",
+      "UserMegaEntryCount": 0,
+      "UserMegaEntryIndex": 0,
+      "TimeRemainingOpponent": 0,
+      "Rank": 9,
+      "FantasyPoints": 1240.66,
+      "FantasyPointsOpponent": 1608.28,
+      "RankScore": 0,
+      "RankScoreOpponent": 0,
+      "UserNameOpponent": "user01",
+      "WinningValue": 0.0,
+      "UpdateStatus": {
+        "lastUpdateTime": "2026-11-17T05:05:58.6312032+00:00"
+      },
+      "Winnings": [
+        {
+          "value": 0,
+          "description": "$0"
+        }
+      ]
+    },
+    {
+      "MegaDraftGroupId": 900009,
+      "MegaContestKey": "100000001",
+      "MegaEntryKey": "00000000-0000-4000-8000-000000000019",
+      "UserName": "user12",
+      "UserKey": "00000000-0000-4000-8000-000000000020",
+      "UserMegaEntryCount": 0,
+      "UserMegaEntryIndex": 0,
+      "TimeRemainingOpponent": 0,
+      "Rank": 10,
+      "FantasyPoints": 1210.24,
+      "FantasyPointsOpponent": 1608.28,
+      "RankScore": 0,
+      "RankScoreOpponent": 0,
+      "UserNameOpponent": "user01",
+      "WinningValue": 0.0,
+      "UpdateStatus": {
+        "lastUpdateTime": "2026-11-17T05:05:58.6312022+00:00"
+      },
+      "Winnings": [
+        {
+          "value": 0,
+          "description": "$0"
+        }
+      ]
+    },
+    {
+      "MegaDraftGroupId": 900009,
+      "MegaContestKey": "100000001",
+      "MegaEntryKey": "00000000-0000-4000-8000-000000000021",
+      "UserName": "user13",
+      "UserKey": "00000000-0000-4000-8000-000000000022",
+      "UserMegaEntryCount": 0,
+      "UserMegaEntryIndex": 0,
+      "TimeRemainingOpponent": 0,
+      "Rank": 11,
+      "FantasyPoints": 1208.06,
+      "FantasyPointsOpponent": 1608.28,
+      "RankScore": 0,
+      "RankScoreOpponent": 0,
+      "UserNameOpponent": "user01",
+      "WinningValue": 0.0,
+      "UpdateStatus": {
+        "lastUpdateTime": "2026-11-17T05:05:58.6312030+00:00"
+      },
+      "Winnings": [
+        {
+          "value": 0,
+          "description": "$0"
+        }
+      ]
+    },
+    {
+      "MegaDraftGroupId": 900009,
+      "MegaContestKey": "100000001",
+      "MegaEntryKey": "00000000-0000-4000-8000-000000000023",
+      "UserName": "user14",
+      "UserKey": "00000000-0000-4000-8000-000000000024",
+      "UserMegaEntryCount": 0,
+      "UserMegaEntryIndex": 0,
+      "TimeRemainingOpponent": 0,
+      "Rank": 12,
+      "FantasyPoints": 1184.56,
+      "FantasyPointsOpponent": 1608.28,
+      "RankScore": 0,
+      "RankScoreOpponent": 0,
+      "UserNameOpponent": "user01",
+      "WinningValue": 0.0,
+      "UpdateStatus": {
+        "lastUpdateTime": "2026-11-17T05:05:58.6312025+00:00"
+      },
+      "Winnings": [
+        {
+          "value": 0,
+          "description": "$0"
+        }
+      ]
+    }
+  ],
+  "UpdateStatus": {
+    "lastUpdateTime": "2026-11-17T05:05:58.8594617+00:00"
+  }
+}

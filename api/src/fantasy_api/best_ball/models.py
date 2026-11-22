@@ -35,3 +35,18 @@ class DraftedTeam(BaseModel):
     tags: str | None = None
     notes: str | None = None
     picks: list[DraftPick]
+
+
+class LeaderboardEntry(BaseModel):
+    model_config = ConfigDict(frozen=True, json_schema_serialization_defaults_required=True)
+
+    rank: int
+    username: str
+    points: float
+
+
+class Leaderboard(BaseModel):
+    model_config = ConfigDict(frozen=True, json_schema_serialization_defaults_required=True)
+
+    contest_id: str
+    entries: list[LeaderboardEntry]
