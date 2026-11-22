@@ -26,13 +26,13 @@ position, and picks (round, overall, player, slot, NFL team), which are public d
 Never commit an unsanitized export: the live sheet has personal notes, winnings and real
 contest entry IDs.
 
-## draftkings_*.json
+## draftkings_*
 
-Real DraftKings API responses, cached by the old app during the 2026 season.
+Real DraftKings responses, cached by the old app during the 2026 season.
 
 | File | Response | Covers |
 |---|---|---|
-| `draftkings_live_contests.json` | Live contests list, trimmed to 2 contests | The contest list; both best-ball draft groups |
+| `draftkings_mycontests.html` | My Contests page: a minimal HTML shell around the real live contests list, trimmed to 2 contests | The contest list; both best-ball draft groups |
 | `draftkings_leaderboard_12.json` | Megacontest leaderboard, contest `100000001` | 12 teams, `fixture-me` 6th (outside the cutoff) |
 | `draftkings_leaderboard_6.json` | Megacontest leaderboard, contest `100000002` | A 6-team league, `fixture-me` 2nd |
 
