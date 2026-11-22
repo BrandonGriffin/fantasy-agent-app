@@ -15,6 +15,7 @@ from fantasy_api.best_ball.models import Leaderboard, LeaderboardEntry
 _LEADERBOARD_URL = "https://api.draftkings.com/scores/v1/megacontests/{contest_id}/leaderboard"
 _MY_CONTESTS_URL = "https://www.draftkings.com/mycontests"
 _LIVE_CONTESTS_KEY = re.compile(r"\blive:\s*")
+_TIMEOUT_SECONDS = 20
 
 
 class DraftKingsError(Exception):
@@ -32,7 +33,10 @@ class DraftKingsAuthError(DraftKingsError):
 def draftkings_client(cookie: SecretStr) -> httpx.AsyncClient:
     """Create an HTTP client that sends the DraftKings session cookie on every request."""
 
-    return httpx.AsyncClient(headers={"Cookie": cookie.get_secret_value()})
+    return httpx.AsyncClient(
+        headers={"Cookie": cookie.get_secret_value()},
+        timeout=_TIMEOUT_SECONDS,
+    )
 
 
 async def fetch_live_contests(client: httpx.AsyncClient) -> str:

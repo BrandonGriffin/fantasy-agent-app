@@ -50,3 +50,10 @@ class Leaderboard(BaseModel):
 
     contest_id: str
     entries: list[LeaderboardEntry]
+
+
+class LeaderboardsResponse(BaseModel):
+    model_config = ConfigDict(frozen=True, json_schema_serialization_defaults_required=True)
+
+    leaderboards: list[Leaderboard]
+    failed: dict[str, str]
