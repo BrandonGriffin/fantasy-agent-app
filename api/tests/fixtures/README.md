@@ -25,3 +25,24 @@ position, and picks (round, overall, player, slot, NFL team), which are public d
 
 Never commit an unsanitized export: the live sheet has personal notes, winnings and real
 contest entry IDs.
+
+## draftkings_*.json
+
+Real DraftKings API responses, cached by the old app during the 2026 season.
+
+| File | Response | Covers |
+|---|---|---|
+| `draftkings_live_contests.json` | Live contests list, trimmed to 2 contests | The contest list; both best-ball draft groups |
+| `draftkings_leaderboard_12.json` | Megacontest leaderboard, contest `100000001` | 12 teams, `fixture-me` 6th (outside the cutoff) |
+| `draftkings_leaderboard_6.json` | Megacontest leaderboard, contest `100000002` | A 6-team league, `fixture-me` 2nd |
+
+Sanitized before committing:
+- Usernames replaced: `fixture-me` for the account owner, `userNN` for everyone else,
+  consistently across files.
+- Contest, entry, user and lineup IDs replaced with fakes (`10000000N`, `9000NN` draft
+  groups, `00000000-0000-4000-8000-...` keys).
+- Winnings, prize pools and prize IDs zeroed.
+
+Kept as-is: ranks, fantasy points, contest names, entry fees and dates.
+
+Never commit an unsanitized response: they include other users' usernames and account keys.
