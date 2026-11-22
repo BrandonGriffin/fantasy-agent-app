@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 
+from fantasy_api.best_ball.routes import router as best_ball_router
 from fantasy_api.config import Settings
 
 
@@ -12,5 +13,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.get("/healthz")
     def healthz() -> dict[str, str]:
         return {"status": "ok"}
+
+    app.include_router(best_ball_router)
 
     return app

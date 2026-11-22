@@ -25,6 +25,12 @@ async def test_draftkings_client_sends_session_cookie() -> None:
 
 
 @pytest.mark.anyio
+async def test_draftkings_client_waits_for_slow_pages() -> None:
+    async with draftkings.draftkings_client(SecretStr("session=abc")) as client:
+        assert client.timeout == httpx.Timeout(20)
+
+
+@pytest.mark.anyio
 async def test_fetch_leaderboard_returns_body_text() -> None:
     body = load_fixture("draftkings_leaderboard_12.json")
 

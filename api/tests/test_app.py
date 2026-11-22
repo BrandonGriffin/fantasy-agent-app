@@ -1,5 +1,8 @@
+from pathlib import Path
+
 import pytest
 from fastapi.testclient import TestClient
+from pydantic import ValidationError
 
 from fantasy_api.config import Settings
 
@@ -31,3 +34,40 @@ def test_secrets_can_be_read_deliberately() -> None:
 
     assert settings.espn_s2 is not None
     assert settings.espn_s2.get_secret_value() == "secret-key"
+
+
+def test_draftkings_settings_have_safe_defaults() -> None:
+    settings = Settings(_env_file=None)
+
+    assert settings.draftkings_cookie is None
+    assert settings.draftkings_username is None
+    assert settings.draftkings_draft_group_ids == []
+    assert settings.draftkings_max_concurrent_requests == 4
+    assert settings.draftkings_replay_db is None
+
+
+def test_draftkings_draft_group_ids_read_from_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("DRAFTKINGS_DRAFT_GROUP_IDS", "[146136, 141336]")
+
+    assert Settings(_env_file=None).draftkings_draft_group_ids == [146136, 141336]
+
+
+@pytest.mark.parametrize("limit", [0, -1])
+def test_draftkings_max_concurrent_requests_must_be_positive(limit: int) -> None:
+    with pytest.raises(ValidationError, match="draftkings_max_concurrent_requests"):
+        Settings(_env_file=None, draftkings_max_concurrent_requests=limit)
+
+
+def test_blank_env_values_count_as_unset(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("DRAFTKINGS_COOKIE", "")
+    monkeypatch.setenv("DRAFTKINGS_USERNAME", "")
+
+    settings = Settings(_env_file=None)
+
+    assert settings.draftkings_cookie is None
+    assert settings.draftkings_username is None
+
+
+def test_draftkings_replay_db_must_exist(tmp_path: Path) -> None:
+    with pytest.raises(ValidationError, match="draftkings_replay_db"):
+        Settings(_env_file=None, draftkings_replay_db=tmp_path / "missing.db")
