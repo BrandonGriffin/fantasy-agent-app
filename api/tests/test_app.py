@@ -16,7 +16,14 @@ def test_healthz_returns_ok(client: TestClient) -> None:
 
 @pytest.mark.parametrize(
     "field",
-    ["espn_s2", "espn_swid", "draftkings_cookie", "underdog_token", "google_sheet_publish_id"],
+    [
+        "espn_s2",
+        "espn_swid",
+        "draftkings_cookie",
+        "underdog_token",
+        "google_sheet_publish_id",
+        "google_sheet_playoff_id",
+    ],
 )
 def test_secrets_do_not_leak(field: str, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv(field.upper(), "secret-key")
@@ -71,3 +78,15 @@ def test_blank_env_values_count_as_unset(monkeypatch: pytest.MonkeyPatch) -> Non
 def test_draftkings_replay_db_must_exist(tmp_path: Path) -> None:
     with pytest.raises(ValidationError, match="draftkings_replay_db"):
         Settings(_env_file=None, draftkings_replay_db=tmp_path / "missing.db")
+
+
+def test_playoff_sheet_settings_default_to_unset() -> None:
+    settings = Settings(_env_file=None)
+
+    assert settings.google_sheet_playoff_id is None
+    assert settings.google_service_account_file is None
+
+
+def test_google_service_account_file_must_exist(tmp_path: Path) -> None:
+    with pytest.raises(ValidationError, match="google_service_account_file"):
+        Settings(_env_file=None, google_service_account_file=tmp_path / "missing.json")

@@ -375,3 +375,127 @@ def test_parse_teams_reads_recorded_sheet() -> None:
     [skipped] = result.skipped
     assert (skipped.block, skipped.sheet_row) == (5, 85)
     assert skipped.reason.startswith("Entry Fee:")
+
+
+# The playoff sheet's first row names only some columns, and its 10th label is
+# "Draft Progress" where the regular-season sheet has "Pod Size".
+PLAYOFF_HEADER = ["0", "", "Round", "Pick #", "", "Pos #", "Team"]
+DRAFT_PROGRESS_ROW = 10
+
+# Team and Pos # stay blank until the ADP Import tab is filled in.
+PLAYOFF_PICKS: list[PickRow] = [
+    ("1", "1", "Puka Nacua", "", ""),
+    ("2", "12", "Rashee Rice", "", ""),
+    ("3", "13", "Jahmyr Gibbs", "", ""),
+]
+
+
+def playoff_block(
+    meta: dict[str, str] | None = None,
+    picks: list[PickRow] | None = None,
+    *,
+    first: bool = True,
+) -> list[list[str]]:
+    rows = team_block(
+        meta={"League Type": "Playoff", **(meta or {})},
+        picks=PLAYOFF_PICKS if picks is None else picks,
+        first=first,
+    )
+    rows[0] = list(PLAYOFF_HEADER if first else REPEATED_HEADER)
+    rows[DRAFT_PROGRESS_ROW][0] = "Draft Progress"
+    return rows
+
+
+def test_parse_teams_reads_playoff_blocks() -> None:
+    result = google_sheet.parse_teams(playoff_block(), google_sheet.PLAYOFF_ROSTERS)
+
+    assert result.skipped == []
+    [team] = result.teams
+    assert team.league_type == "Playoff"
+    assert team.picks == [
+        DraftPick(round=1, overall=1, name="Puka Nacua", slot="", nfl_team=""),
+        DraftPick(round=2, overall=12, name="Rashee Rice", slot="", nfl_team=""),
+        DraftPick(round=3, overall=13, name="Jahmyr Gibbs", slot="", nfl_team=""),
+    ]
+
+
+def test_parse_teams_keeps_however_many_playoff_picks_are_filled_in() -> None:
+    draftkings = [(str(r), str(r), f"Player {r}", "", "") for r in range(1, 13)]
+    underdog = [(str(r), str(r), f"Player {r}", "", "") for r in range(1, 11)]
+    rows = playoff_block({"Fantasy Platform": "DraftKings"}, draftkings) + playoff_block(
+        {"Fantasy Platform": "Underdog"}, underdog, first=False
+    )
+
+    teams = google_sheet.parse_teams(rows, google_sheet.PLAYOFF_ROSTERS).teams
+
+    assert [len(team.picks) for team in teams] == [12, 10]
+
+
+def test_parse_teams_rejects_playoff_blocks_with_the_regular_season_layout() -> None:
+    with pytest.raises(SheetLayoutError, match="Draft Progress"):
+        google_sheet.parse_teams(team_block(), google_sheet.PLAYOFF_ROSTERS)
+
+
+def test_parse_teams_rejects_regular_season_blocks_with_the_playoff_layout() -> None:
+    rows = playoff_block()
+    rows[0] = list(FULL_HEADER)
+
+    with pytest.raises(SheetLayoutError, match="Pod Size"):
+        google_sheet.parse_teams(rows)
+
+
+def test_parse_teams_reads_recorded_playoff_sheet() -> None:
+    text = (FIXTURES / "google_sheet_playoff_rosters.csv").read_bytes().decode("utf-8")
+    assert "\r\n" in text
+
+    result = google_sheet.parse_teams(google_sheet.read_rows(text), google_sheet.PLAYOFF_ROSTERS)
+
+    assert result.skipped == []
+    assert [team.platform for team in result.teams] == [Platform.DRAFTKINGS, Platform.UNDERDOG]
+    assert [len(team.picks) for team in result.teams] == [12, 10]
+    assert result.teams[0].draft_date == date(2025, 12, 1)
+    assert result.teams[1].picks[1] == DraftPick(
+        round=2, overall=11, name="Drake Maye", slot="", nfl_team=""
+    )
+
+
+ADP_HEADER = ["Player", "Pos", "Team", "ADP", "Value", "Advance Rate", "Underdog ADP"]
+
+
+def test_parse_players_maps_normalized_names_to_position_and_team() -> None:
+    rows = [
+        ADP_HEADER,
+        ["Puka Nacua", "WR", "LAR", "1.2", "", "", "1.5"],
+        ["Kenneth Walker III", "RB", "SEA", "30.1", "", "", ""],
+    ]
+
+    players = google_sheet.parse_players(rows)
+
+    assert players == {
+        "pukanacua": google_sheet.PlayerInfo(name="Puka Nacua", position="WR", nfl_team="LAR"),
+        "kennethwalker": google_sheet.PlayerInfo(
+            name="Kenneth Walker III", position="RB", nfl_team="SEA"
+        ),
+    }
+
+
+def test_parse_players_skips_blank_rows() -> None:
+    # Real case: unused rows hold a space for the name and #N/A for the team.
+    rows = [ADP_HEADER, [" ", "", "#N/A", "", "82.772", "", ""]]
+
+    assert google_sheet.parse_players(rows) == {}
+
+
+def test_parse_players_keeps_the_first_of_two_players_with_the_same_name() -> None:
+    rows = [ADP_HEADER, ["Josh Allen", "QB", "BUF"], ["Josh Allen", "LB", "JAX"]]
+
+    players = google_sheet.parse_players(rows)
+
+    assert players["joshallen"].nfl_team == "BUF"
+
+
+def test_parse_players_raises_when_header_is_missing_a_column() -> None:
+    rows = [["Player", "Position", "Team"], ["Puka Nacua", "WR", "LAR"]]
+
+    with pytest.raises(SheetLayoutError, match="Pos"):
+        google_sheet.parse_players(rows)
