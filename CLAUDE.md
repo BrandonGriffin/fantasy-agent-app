@@ -12,13 +12,17 @@ Fleaflicker, DraftKings and Underdog data, and an AI agent layer on top.
 
 ## Layout
 - `api/` – FastAPI service (uv, src layout, package `fantasy_api`)
-- `web/` – React 19 + Vite + TypeScript (not started)
+- `web/` – React 19 + Vite + TypeScript (Node 24, oxlint, Vitest + Testing Library)
 - `agent/` – hand-written tool-calling agent, triage, evals (not started)
 - `docs/` – DESIGN.md and other docs
 
 ## Commands (run from `api/`)
 - Dev server: `uv run uvicorn fantasy_api.main:create_app --factory --reload`
 - Checks: `uv run ruff check .` · `uv run ruff format --check .` · `uv run mypy src tests` · `uv run pytest`
+
+## Commands (run from `web/`)
+- Dev server: `npm run dev` (proxies `/best-ball` and `/healthz` to the API on port 8000)
+- Checks: `npm run lint` · `npm run typecheck` · `npm test` · `npm run build`
 
 ## Conventions
 - App factory: `create_app(settings)`; no module-level `app`, so importing reads no config.
