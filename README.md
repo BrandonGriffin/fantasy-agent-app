@@ -36,3 +36,14 @@ Auto-fix: `uv run ruff check . --fix` and `uv run ruff format .`
 ```bash
 uv run pytest tests
 ```
+
+## Web (run from `web/`, needs Node 24)
+
+```bash
+npm install
+npm run dev                  # http://localhost:5173, with the API running on port 8000
+```
+
+The dev server proxies `/best-ball` and `/healthz` to the API, so the browser never needs CORS.
+
+Checks: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`
