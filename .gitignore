@@ -25,3 +25,7 @@ dist/
 .idea/
 .DS_Store
 Thumbs.db
+
+
+sheets-service-account.json
+*service-account*.json

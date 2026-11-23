@@ -26,6 +26,24 @@ position, and picks (round, overall, player, slot, NFL team), which are public d
 Never commit an unsanitized export: the live sheet has personal notes, winnings and real
 contest entry IDs.
 
+## google_sheet_playoff_rosters.csv
+
+Three blocks in the layout of the playoff sheet's Rosters tab: 30 columns, CRLF line endings.
+Built from cell values read through the Sheets API (the 2025 playoff sheet isn't published),
+so quoting follows Python's csv writer rather than Google's export.
+
+| Block | Source block | Covers |
+|---|---|---|
+| 1 | 1 | DraftKings, 12 picks; the first row's partial header (`0`, blank Metadata and Player Name) |
+| 2 | 4 | Underdog, 10 picks |
+| 3 | n/a | Empty template block |
+
+Team and Pos # are blank, as in the sheet before the ADP Import tab is filled in.
+
+Sanitized before committing: league IDs and draft URLs replaced with fakes; Draft Progress,
+Contest URL, placements, Winnings, Roster Nickname, Co-manager(s), Tags and Notes blanked;
+columns H onward blanked.
+
 ## draftkings_*
 
 Real DraftKings responses, cached by the old app during the 2026 season.

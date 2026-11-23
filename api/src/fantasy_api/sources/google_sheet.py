@@ -9,6 +9,11 @@ The teams tab is a stack of 21-row blocks, one per drafted team, 30 columns wide
   Teams have 20 picks, or 18 on 18-round contests; unused pick rows are blank.
 Every value is a string and empty cells are "". Blocks with no platform and no picks are
 unused templates. Lines end in CRLF, and notes can contain quoted commas.
+
+The playoff sheet's Rosters tab uses the same blocks, with two differences (see
+PLAYOFF_ROSTERS): its first row names only some columns, and "Draft Progress" replaces
+"Pod Size". Its Team and Pos # cells stay blank until the ADP Import tab is filled in, so
+player teams and positions come from that tab instead (see parse_players).
 """
 
 import csv
@@ -21,6 +26,7 @@ from itertools import batched
 
 import httpx
 
+from fantasy_api import normalize
 from fantasy_api.best_ball.models import DraftedTeam, DraftPick, Platform
 
 BLOCK_SIZE = 21
@@ -62,6 +68,15 @@ _META_LABELS = (
     "Notes",
 )
 
+_PLAYOFF_META_LABELS = tuple(
+    "Draft Progress" if label == "Pod Size" else label for label in _META_LABELS
+)
+
+# The block template's fixed column positions, A-G.
+_TEMPLATE_COLUMNS = {name: position for position, name in enumerate(_REQUIRED_COLUMNS)}
+
+_ADP_COLUMNS = ("Player", "Pos", "Team")
+
 
 class SheetError(Exception):
     """Base error for the Google Sheet source."""
@@ -86,6 +101,25 @@ class SkippedBlock:
     block: int  # 1-based block number
     sheet_row: int  # 1-based sheet row where the block starts, as shown in Google Sheets
     reason: str
+
+
+@dataclass(frozen=True)
+class TeamsLayout:
+    """How one sheet's team blocks are laid out."""
+
+    meta_labels: tuple[str, ...]
+    columns: Mapping[str, int] | None = None  # None: read from the sheet's first row
+
+
+TEAMS_TAB = TeamsLayout(meta_labels=_META_LABELS)
+PLAYOFF_ROSTERS = TeamsLayout(meta_labels=_PLAYOFF_META_LABELS, columns=_TEMPLATE_COLUMNS)
+
+
+@dataclass(frozen=True)
+class PlayerInfo:
+    name: str
+    position: str
+    nfl_team: str
 
 
 @dataclass(frozen=True)
@@ -169,18 +203,18 @@ def parse_sheet_date(value: str) -> date:
     raise ValueError(f"not a parseable date: {value}")
 
 
-def parse_teams(rows: Sequence[Sequence[str]]) -> ParsedTeams:
+def parse_teams(rows: Sequence[Sequence[str]], layout: TeamsLayout = TEAMS_TAB) -> ParsedTeams:
     """Turn sheet rows into drafted teams.
 
     Empty template blocks are skipped silently. A block with a bad cell is skipped and
     reported in ParsedTeams.skipped. Layout problems raise SheetLayoutError.
     """
-    columns = _column_positions(rows[0])
+    columns = _column_positions(rows[0]) if layout.columns is None else layout.columns
     teams: list[DraftedTeam] = []
     skipped: list[SkippedBlock] = []
 
     for number, block in enumerate(_blocks(rows), start=1):
-        _check_labels(block, columns, number)
+        _check_labels(block, columns, layout.meta_labels, number)
         if _is_template(block, columns):
             continue
         try:
@@ -191,6 +225,29 @@ def parse_teams(rows: Sequence[Sequence[str]]) -> ParsedTeams:
             )
 
     return ParsedTeams(teams=teams, skipped=skipped)
+
+
+def parse_players(rows: Sequence[Sequence[str]]) -> dict[str, PlayerInfo]:
+    """Map each player on the ADP tab, by normalize.player_name, to their position and team.
+
+    Rows with a blank name are skipped. When two players share a name, the first row wins.
+    """
+    header, *body = rows
+    positions = {name: position for position, name in enumerate(header) if name}
+    missing = [name for name in _ADP_COLUMNS if name not in positions]
+    if missing:
+        raise SheetLayoutError(f"ADP header is missing columns: {missing}")
+    name, position, team = (positions[column] for column in _ADP_COLUMNS)
+
+    players: dict[str, PlayerInfo] = {}
+    for row in body:
+        player = row[name].strip()
+        if player:
+            players.setdefault(
+                normalize.player_name(player),
+                PlayerInfo(name=player, position=row[position], nfl_team=row[team]),
+            )
+    return players
 
 
 def _blocks(rows: Sequence[Sequence[str]]) -> Iterator[tuple[Sequence[str], ...]]:
@@ -209,11 +266,16 @@ def _sheet_row(number: int) -> int:
     return (number - 1) * BLOCK_SIZE + 1
 
 
-def _check_labels(block: Sequence[Sequence[str]], columns: Mapping[str, int], number: int) -> None:
-    """Raise if the block's metadata labels aren't _META_LABELS in order (rows shifted)."""
+def _check_labels(
+    block: Sequence[Sequence[str]],
+    columns: Mapping[str, int],
+    meta_labels: Sequence[str],
+    number: int,
+) -> None:
+    """Raise if the block's metadata labels aren't meta_labels in order (rows shifted)."""
     label = columns["Metadata Label"]
     start = _sheet_row(number)
-    rows = enumerate(zip(_META_LABELS, block[1:], strict=True), start=1)
+    rows = enumerate(zip(meta_labels, block[1:], strict=True), start=1)
     for offset, (expected, row) in rows:
         if row[label] != expected:
             raise SheetLayoutError(

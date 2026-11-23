@@ -16,3 +16,5 @@ class Settings(BaseSettings):
     google_sheet_publish_id: SecretStr | None = None
     google_sheet_teams_gid: str | None = None
     google_sheet_adp_gid: str | None = None
+    google_service_account_file: FilePath | None = None
+    google_sheet_playoff_id: SecretStr | None = None
